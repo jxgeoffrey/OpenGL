@@ -1,0 +1,2 @@
+﻿  Source.cpp
+c:\users\arun\documents\github\opengl\opengl\src\source.cpp(1): fatal error C1083: Cannot open include file: 'GL/glew.h': No such file or directory
