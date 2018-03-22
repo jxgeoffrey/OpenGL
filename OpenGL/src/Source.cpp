@@ -5,6 +5,28 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if(!(x)) __debugbreak();
+#define GLCall(x) GLClearError();\
+						x;\
+						ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError()
+{
+	while (glGetError != GL_NO_ERROR);
+}
+
+
+static bool GLLogCall(const char* function, const char* file, int line)
+{
+	while (GLenum error = glGetError())
+	{
+		std::cout << "[OpenGL Error:]" << error << std::endl;
+		std::cout << "In file: " << file << ", line no: " << line << std::endl;
+
+		return false;
+	}
+	return true;
+}
 
 struct ShaderSourceProgram 
 {
@@ -143,7 +165,7 @@ int main(void)
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 
 	
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
@@ -161,6 +183,10 @@ int main(void)
 	unsigned int shaderProgram = CreateShader(shader.VertexShader, shader.FragmentShader);
 	glUseProgram(shaderProgram);
 
+	int location = glGetUniformLocation(shaderProgram, "u_Color");
+	ASSERT(location != -1);
+	glUniform4f(location, 0.5f, 0.2f, 0.1f, 1.0f);
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -169,6 +195,7 @@ int main(void)
 
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
